@@ -60,7 +60,7 @@ h1{
   opacity:.55}
 
 /* ─── 座位 ─── */
-#seats{display:flex;gap:9px;margin:14px 0 6px;padding-bottom:56px}  /* 下面这条是留给说话气泡的，够三行 */
+#seats{display:flex;gap:9px;margin:14px 0 6px;padding-bottom:56px;position:relative;z-index:60}  /* 压在牌桌之上：气泡错层下垂时不能钻到牌堆底下 */  /* 下面这条是留给说话气泡的，够三行 */
 .seat{flex:1;text-align:center;padding:9px 4px 8px;border-radius:9px;position:relative;
   border:1px solid rgba(199,154,78,.22);background:rgba(0,0,0,.22);
   transition:border-color .3s,background .3s,transform .3s}
@@ -70,6 +70,10 @@ h1{
 .mtag.mad{background:var(--red);color:#FFE9E0;animation:madpulse 1.1s ease-in-out infinite}
 .mtag.glee{background:var(--brass);color:#20160A;font-weight:600}
 .mtag.oops{background:rgba(8,20,14,.85);color:var(--dim);border:1px solid rgba(199,154,78,.3)}
+.mtag.calm{background:rgba(8,20,14,.7);color:var(--dim);border:1px solid rgba(199,154,78,.18)}
+.mtag.r1{background:rgba(90,70,20,.85);color:#EFD9A8}
+.mtag.r2{background:rgba(140,70,20,.9);color:#FFE2C4}
+.mtag.r3{background:var(--red);color:#FFE9E0}
 @keyframes madpulse{50%{transform:scale(1.12)}}
 .seat .nm{font-size:13px;letter-spacing:.06em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 3px}
 .ava{width:34px;height:34px;border-radius:50%;overflow:hidden;margin:0 auto 3px;
@@ -79,17 +83,21 @@ h1{
 .fan i{position:absolute;top:0;width:9px;height:14px;border-radius:2px;
   background:linear-gradient(150deg,#9C3129,#6E211B);border:.5px solid rgba(0,0,0,.45)}
 .seat .ct{font-size:11px;color:var(--dim);letter-spacing:.1em}
-/* 说话的小气泡，挂在座位底下 */
-.bub{position:absolute;top:calc(100% + 6px);left:50%;z-index:5;
+/* 说话的小气泡，挂在座位底下。长台词往下长（盖住点牌桌没关系），左右两个座位的气泡贴边不出屏 */
+.bub{position:absolute;top:calc(100% + 6px);left:50%;z-index:5;translate:-50% 0;
   max-width:210px;width:max-content;padding:5px 10px;border-radius:9px;
   background:var(--paper);color:var(--ink);font-size:11.5px;line-height:1.45;
-  box-shadow:0 3px 11px rgba(0,0,0,.45);transform:translateX(-50%)}
+  box-shadow:0 3px 11px rgba(0,0,0,.45)}
 .bub.pop{animation:bubin .2s ease-out backwards}
 .bub.ebub{padding:3px;width:52px;height:52px;max-width:none;border-radius:50%;overflow:hidden}
 .bub.ebub svg{width:100%;height:100%;display:block}
 .bub::after{content:"";position:absolute;bottom:100%;left:50%;margin-left:-5px;
   border:5px solid transparent;border-bottom-color:var(--paper)}
-@keyframes bubin{from{transform:translateX(-50%) translateY(-5px) scale(.92);opacity:0}}
+#seats .seat:first-child .bub:not(.ebub){left:0;translate:0 0}
+#seats .seat:first-child .bub::after{left:22px;margin-left:0}
+#seats .seat:last-child .bub:not(.ebub){left:auto;right:0;translate:0 0}
+#seats .seat:last-child .bub::after{left:auto;right:22px;margin-left:0}
+@keyframes bubin{from{transform:translateY(-5px) scale(.92);opacity:0}}
 .seat.low .ct{color:#E0806F}
 
 /* ─── 牌桌 ─── */
@@ -98,7 +106,7 @@ h1{
   border:1px solid rgba(199,154,78,.3);
   background:radial-gradient(ellipse 80% 70% at 50% 40%, rgba(46,94,71,.55), rgba(6,20,14,.55));
   box-shadow:inset 0 0 34px rgba(0,0,0,.55), 0 6px 20px rgba(0,0,0,.3);
-  min-height:200px;padding:20px 16px;position:relative;overflow:hidden;
+  height:244px;flex:none;padding:20px 16px;position:relative;overflow:hidden;   /* 钉死且禁止 flex 压缩：牌桌永远一个大小 */
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
 }
 .who{font-size:12.5px;color:var(--dim);letter-spacing:.14em}
@@ -155,7 +163,7 @@ h1{
 .avapick .ap.txt{display:flex;align-items:center;justify-content:center;color:var(--dim);font-size:12px}
 .roomcode{font-family:Georgia,serif;font-size:38px;letter-spacing:.35em;text-indent:.35em;
   text-align:center;color:var(--brass);margin:6px 0 14px;text-shadow:0 2px 8px rgba(0,0,0,.4)}
-#hostName,#joinName{width:100%;padding:11px;border-radius:8px;border:1px solid rgba(199,154,78,.4);
+#hostName,#joinCode,#joinName{width:100%;padding:11px;border-radius:8px;border:1px solid rgba(199,154,78,.4);
   background:rgba(0,0,0,.25);color:var(--ivory);font-family:inherit;font-size:14px}
 #startRules{background:none;border:none;color:var(--dim);font-family:inherit;font-size:13px;
   margin-top:20px;cursor:pointer;border-bottom:1px solid transparent;padding:4px 2px}
@@ -239,16 +247,19 @@ h1{
 
 /* ─── 日志 ─── */
 #log{font-size:12.5px;line-height:1.75;color:var(--dim);margin:10px 2px 4px;min-height:68px}
-#log:empty{min-height:0}
 #log div{opacity:.6}
 #log div:first-child{opacity:1;color:var(--ivory)}
 #log .talk{color:var(--brass)}
 
 /* ─── 手牌 ─── */
 #handwrap{margin-top:auto;padding-top:6px}
-.label{font-size:11px;color:var(--brass);letter-spacing:.2em;margin-bottom:9px;
-  display:flex;justify-content:space-between;align-items:baseline}
-.label span{color:var(--dim);letter-spacing:.08em}
+.label{font-size:11px;margin-bottom:9px;
+  display:flex;justify-content:space-between;align-items:center;min-height:26px}
+.label .lt{color:var(--brass);letter-spacing:.2em}
+.label .lt span{color:var(--dim);letter-spacing:.08em}
+#emoteBtn{background:rgba(199,154,78,.13);border:1px solid rgba(199,154,78,.5);color:var(--ivory);
+  border-radius:8px;padding:4px 15px;font-size:12.5px;font-family:inherit;letter-spacing:.1em;cursor:pointer}
+#emoteBtn:active{transform:translateY(1px)}
 #handscroll{overflow-x:auto;overflow-y:visible;padding:12px 0 4px;-webkit-overflow-scrolling:touch}
 #hand{position:relative;height:76px;margin:0 auto}
 #hand .card{position:absolute;top:12px;cursor:pointer;
@@ -281,17 +292,21 @@ button:focus-visible,.card:focus-visible{outline:2px solid var(--brass);outline-
 .tface{display:inline-block;width:24px;height:24px;border-radius:50%;overflow:hidden;vertical-align:-7px;margin-right:6px}
 .tface svg{width:100%;height:100%;display:block}
 #ebar button:active{transform:translateY(1px)}
+#ebar input{flex:1;min-width:0;padding:10px 12px;border-radius:9px;border:1px solid rgba(199,154,78,.4);
+  background:rgba(0,0,0,.35);color:var(--ivory);font-size:14px;font-family:inherit}
+#ebar input::placeholder{color:var(--dim)}
+#ebar button.go{background:var(--brass);color:#20160A;font-weight:600;border-radius:9px;padding:10px 18px}
 #etoast{position:fixed;left:50%;bottom:150px;transform:translateX(-50%);z-index:30;
   background:var(--paper);color:var(--ink);padding:6px 15px;border-radius:12px;font-size:13px;
   box-shadow:0 4px 14px rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .25s}
 #etoast.on{opacity:1}
-#hint{font-size:12.5px;color:var(--dim);text-align:center;margin-top:9px;min-height:17px;line-height:1.45;
-  max-height:3.1em;overflow:hidden}
+#hint{font-size:12.5px;color:var(--dim);text-align:center;margin-top:9px;line-height:1.45;
+  height:1.5em;overflow:hidden}   /* 钉死一行位，有字没字都不挪版面 */
 #hint b{color:var(--brass);font-weight:600}
 
 /* ─── 弹层 ─── */
 .sheet{position:fixed;inset:0;background:rgba(4,14,10,.82);display:none;
-  align-items:center;justify-content:center;padding:18px;z-index:10}
+  align-items:center;justify-content:center;padding:18px;z-index:100}  /* 弹窗永远在最上层 */
 .sheet.on{display:flex}
 .panel{background:linear-gradient(#17362B,#102822);border:1px solid rgba(199,154,78,.35);
   border-radius:12px;padding:22px 20px;max-width:410px;width:100%;
@@ -320,13 +335,14 @@ button:focus-visible,.card:focus-visible{outline:2px solid var(--brass);outline-
 #winner{font-family:"Songti SC","STSong",serif;font-size:30px;letter-spacing:.16em;
   text-align:center;margin:8px 0 14px;text-indent:.16em}
 /* 矮屏幕（iPhone SE、小安卓这类）整体收紧，保证手牌和按钮always在屏幕里 */
+@media (max-height:850px){ #stage{height:214px} }
 @media (max-height:800px){
   header{padding:10px 0 8px}
   h1{font-size:25px}
   #seats{margin:9px 0 4px;padding-bottom:52px}
   .seat{padding:6px 4px 5px}
   .ava{width:27px;height:27px;margin-bottom:2px}
-  #stage{min-height:150px;padding:12px 12px;margin:4px 0 2px;gap:8px}
+  #stage{height:174px;padding:12px 12px;margin:4px 0 2px;gap:8px}
   .bk{width:40px;height:56px}
   .pile{height:70px;width:108px}
   .pilect{font-size:11px}
@@ -341,8 +357,8 @@ button:focus-visible,.card:focus-visible{outline:2px solid var(--brass);outline-
   h1{font-size:22px}
   header{padding:8px 0 6px}
   #seats{padding-bottom:40px;margin:7px 0 3px}
-  .bub{font-size:11px;line-height:1.35;padding:3px 8px;max-width:185px;max-height:2.9em;overflow:hidden}
-  #stage{min-height:104px;padding:8px 10px;gap:6px}
+  .bub{font-size:11px;line-height:1.35;padding:3px 8px;max-width:185px}
+  #stage{height:148px;padding:8px 10px;gap:6px}
   .plaque{font-size:18px;padding:6px 14px}
   .pile{height:62px;width:100px}
   .bk{width:36px;height:50px}
@@ -354,9 +370,10 @@ button:focus-visible,.card:focus-visible{outline:2px solid var(--brass);outline-
   #hand .card{top:10px}
   #controls{margin-top:7px}
   button.act{padding:11px 6px;font-size:14px}
-  button.act.wide{padding:12px 6px;margin-bottom:6px}
-  #hint{margin-top:5px}
+  button.act.wide{padding:8px 6px;margin-bottom:5px}
+  #hint{margin-top:4px}
 }
+@media (max-height:600px){ #stage{height:118px} .pile{height:56px} }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -366,7 +383,6 @@ button:focus-visible,.card:focus-visible{outline:2px solid var(--brass);outline-
     <div class="brand">
       <h1>苗伯说瞎话<span class="ver" id="ver"></span></h1>
       <div class="tools">
-        <button id="emoteBtn" style="display:none">喊话</button>
         <button id="rulesBtn">规则</button>
         <button id="setBtn">设置</button>
       </div>
@@ -381,7 +397,7 @@ button:focus-visible,.card:focus-visible{outline:2px solid var(--brass);outline-
   <div id="etoast"></div>
 <div id="handwrap">
     <div id="ebar"></div>
-    <div class="label">你的手牌 <span id="handct"></span></div>
+    <div class="label"><span class="lt">你的手牌 <span id="handct"></span></span><button id="emoteBtn" style="display:none">喊话</button></div>
     <div id="handscroll"><div id="hand"></div></div>
     <div id="controls"></div>
     <div id="hint"></div>
@@ -416,7 +432,7 @@ button:focus-visible,.card:focus-visible{outline:2px solid var(--brass);outline-
       <button data-v="1">带王，王算任意点数</button><button data-v="0">不带王</button></div></div>
   <div class="opt"><div class="q">一手最多出几张</div>
     <div class="seg" data-k="max">
-      <button data-v="3">3 张</button><button data-v="4">4 张</button><button data-v="5">5 张</button></div></div>
+      <button data-v="2">2 张</button><button data-v="3">3 张</button><button data-v="4">4 张</button><button data-v="5">5 张</button></div></div>
   <div class="opt"><div class="q">三家都过之后，桌上那堆牌</div>
     <div class="seg" data-k="burn">
       <button data-v="1">作废不要</button><button data-v="0">最后出牌的人收走</button></div></div>
@@ -430,6 +446,9 @@ button:focus-visible,.card:focus-visible{outline:2px solid var(--brass);outline-
   <div class="opt"><div class="q">他仨嘴里干不干净</div>
     <div class="seg" data-k="salty">
       <button data-v="1">带脏字，过瘾</button><button data-v="0">文明点</button></div></div>
+  <div class="opt"><div class="q">节奏（AI 出手快慢、翻牌停顿）</div>
+    <div class="seg" data-k="pace">
+      <button data-v="1">爽快</button><button data-v="2">适中</button><button data-v="3">悠着点</button></div></div>
   <div class="opt"><div class="q">音效</div>
     <div class="seg" data-k="sound">
       <button data-v="1">开</button><button data-v="0">关</button></div></div>
@@ -450,8 +469,8 @@ button:focus-visible,.card:focus-visible{outline:2px solid var(--brass);outline-
 
 <div class="sheet" id="netSheet"><div class="panel">
   <div id="netHost" style="display:none">
-    <h2>开家里的牌桌</h2>
-    <p>让他们打开游戏点「联机 · 加入」就进来了，不用对暗号。人齐了开打，空位 AI 补。</p>
+    <h2>开房</h2>
+    <p>他们点「联机 · 加入」就能进来。人齐了开打，空位 AI 补。</p>
     <div class="opt"><div class="q">你的名字</div>
       <input id="hostName" maxlength="8" placeholder="房主"></div>
     <div class="opt"><div class="q">你的头像</div><div class="avapick" id="hostAva"></div></div>
@@ -506,8 +525,9 @@ const nm=i=>i===mySeat?'你':NAMES[i];
 const isAI=i=>SEATK[i]==='ai';
 
 /* ═══ 可调规则 ═══ */
-const VERSION='1.32';   // 改了东西就往上加，手机上看标题旁边那个号，能确认刷到新版没有
-const SET={wild:1,max:4,burn:1,ai:1,sound:1,salty:1};
+const VERSION='1.58';   // 改了东西就往上加，手机上看标题旁边那个号，能确认刷到新版没有
+const SET={wild:1,max:2,burn:1,ai:1,sound:1,salty:1,pace:3};
+const PACEF=()=>[1,.85,1.15,1.5][SET.pace]||1.5;   // 节奏：爽快/适中/悠着点，乘在 AI 思考和桌面停顿上
 try{ const _s=JSON.parse(localStorage.getItem('sxh_set')||'null');
      if(_s&&typeof _s==='object') for(const k in SET) if(typeof _s[k]==='number') SET[k]=_s[k];
 }catch(e){}
@@ -676,7 +696,7 @@ function deal(){
   over=false;winner=null;logs=[];selected=new Set();fresh=new Set();outQueue=[];
   ECFG={wild:SET.wild,max:SET.max,burn:SET.burn};
   turn=Math.random()*4|0;          // 谁先出，抽签
-  tilt={}; bubble=null; rage=[0,0,0,0]; banterEpoch++; rollPileJit(); rollBack();
+  tilt={}; bubClear(); rage=[0,0,0,0]; coolCall=[0,0,0,0]; banterEpoch++; rollPileJit(); rollBack();
   known=[{},{},{},{}]; roundLeaderId=null; mood=['','idle','idle','idle'];
   Sfx.deal();
 }
@@ -694,12 +714,17 @@ const faceUp=c=>'<div class="'+cls(c)+'">'+cardInner(c)+'</div>';
 function render(){
   $('seats').innerHTML=[1,2,3].map(k=>(mySeat+k)%4).map(i=>{
     const n=hands[i].length;
-    const bub=(bubble&&bubble.p===i)?
-      (bubble.emo? '<div class="bub ebub'+(bubble.pop?' pop':'')+'">'+emoFace(bubble.emoKey,bubble.emo)+'</div>'
-                 : '<div class="bub'+(bubble.pop?' pop':'')+'">'+esc(bubble.text)+'</div>') : '';
+    const B=BUBS[i];
+    const bub=B? (B.emo? '<div class="bub ebub'+(B.pop?' pop':'')+'">'+emoFace(B.emoKey,B.emo)+'</div>'
+                       : '<div class="bub'+(B.pop?' pop':'')+'">'+esc(B.text)+'</div>') : '';
+    const rg=rage[i]||0;
     const mt = tilt[i]? '<div class="mtag mad">上头</div>'
              : mood[i]==='glee'? '<div class="mtag glee">得意</div>'
-             : mood[i]==='oops'? '<div class="mtag oops">栽了</div>' : '';
+             : mood[i]==='oops'? '<div class="mtag oops">栽了</div>'
+             : rg>=3? '<div class="mtag r3">要炸</div>'
+             : rg===2? '<div class="mtag r2">上火</div>'
+             : rg===1? '<div class="mtag r1">憋气</div>'
+             : '<div class="mtag calm">淡定</div>';
     return '<div class="seat'+(turn===i?' active':'')+(n<=3?' low':'')+'">'+mt+
       '<div class="ava">'+avaSVG(i)+'</div>'+
       '<div class="nm">'+NAMES[i]+'</div>'+
@@ -715,7 +740,27 @@ function render(){
   $('handct').textContent=n+' 张';
   $('log').innerHTML=logs.map(t=>'<div>'+t+'</div>').join('');
   fresh.clear();
-  if(bubble) bubble.pop=false;      // 弹出动画只播一次
+  for(const k in BUBS) BUBS[k].pop=false;   // 弹出动画只播一次
+  staggerBubs();
+}
+// 几个气泡同时在场且互相压着时，把右边的往下错开一层，谁的话都看得全
+function staggerBubs(){
+  const els=[...document.querySelectorAll('#seats .bub')];
+  if(els.length<2) return;
+  els.sort((a,b)=>a.getBoundingClientRect().left-b.getBoundingClientRect().left);
+  const placed=[];
+  els.forEach(el=>{
+    let r=el.getBoundingClientRect(), guard=0;
+    while(guard++<8){
+      const hit=placed.find(q=>r.left<q.right+5&&r.right>q.left-5&&r.top<q.bottom+5&&r.bottom>q.top-5);
+      if(!hit) break;
+      const dy=(parseFloat(el.dataset.dy||'0'))+(hit.bottom+6-r.top);
+      el.dataset.dy=dy;
+      el.style.top='calc(100% + '+(6+dy)+'px)';
+      r=el.getBoundingClientRect();
+    }
+    placed.push(r);
+  });
 }
 
 function stage(html,stampText){
@@ -751,22 +796,10 @@ function humanTurn(){
     humanResolve=res;
     if(currentRank===null){
       stage('<div class="who">该你出牌</div><div class="plaque">你来定点数</div>');
-      $('hint').textContent='';
     }else{
       stage(claimHTML(lastPlay.player,lastPlay.cards.length,currentRank)+pileHTML());
-      let ev='';
-      if(canCall()){                              // 只留情报，不留教学
-        const cap=4+(ECFG.wild?2:0), k=lastPlay.cards.length;
-        const mine=hands[mySeat].filter(c=>fits(c,currentRank)).length;
-        if(k+mine>cap)
-          ev='你攥着 '+mine+' 张能当 '+RANKS[currentRank]+' 的 —— 他报 '+k+' 张，数不可能，<b>他一定在吹</b>！';
-        else if(mine>0)
-          ev='你攥着 '+mine+' 张，他手里的 '+RANKS[currentRank]+' 最多还剩 '+(cap-mine-k)+' 张。';
-        if(hands[lastPlay.player].length===0)
-          ev+=(ev?' ':'')+'<b>他这一手出完就赢了</b> —— 是真的你抓不抓都输，是吹的只有抓才有救。';
-      }
-      $('hint').innerHTML=ev;
     }
+    $('hint').textContent='';                     // 数牌雷达撤了：自己数，才是这游戏的滋味
     updateControls();
   });
 }
@@ -796,7 +829,7 @@ function updateControls(){
   $('passBtn').disabled=!(my&&currentRank!==null);
   const cb=$('callBtn'), ok=my&&canCall();
   cb.disabled=!ok;
-  cb.style.display=ok?'block':'none';
+  cb.style.visibility=ok?'visible':'hidden';   // 隐身但占位：出现和消失都不挪版面
   cb.textContent = ok? '说瞎话！抓 '+nm(lastPlay.player) : '说瞎话！';
 }
 $('hand').addEventListener('click',e=>{
@@ -904,6 +937,7 @@ const ROSTER=[
      pass:['我过','手里没有','介轮不掺和'],call:['我不信','你打镲呢吧','翻开我瞅瞅'],
      caught:['哎哟喂','让你逮着了','介把崴泥了','我说我嘛手气'],clear:['我说嘛来着','冤枉好人不是','介回信我了吧'],
      win:['我就说','可不咋地','瞅着就不对'],lose:['我介眼神','白饶了','嗨，白背一手'],
+     mock:['嚛，露馅儿了吧','介不栽了嘛','早瞧出你不地道','跟谁学的介一手'],gloat:['抓嘛抓，手潮','介一下亏大发了','眼神儿不行歇会儿吧'],doubt:['报介么多，邪乎','我可不大信','吹呢吧介是'],
      tilt:['介都嘛事儿啊！','气得我脑仁儿疼','缺德带冒烟儿的','我介暴脾气上来了','甭拦着我','老没溜儿！'],
      threat:['他快没牌了','拦着点他'],last:['我就剩俩了','快了快了'],over:['出完喽！'],
      salty:{tilt:['操，邪了门了','我去你大爷的','气死我了真他妈的','什么王八羔子牌','妈了个巴子的','操蛋玩意儿'],
@@ -918,6 +952,7 @@ const ROSTER=[
      pass:['介轮不玩','我歇会儿','你们打'],call:['吹吧你！','翻开瞅瞅','你介脸都不红'],
      caught:['让你蒙对一回','行行行算你狠','我介是给你留面子'],clear:['傻了吧','让你抓','介回学乖了吧'],
      win:['我就说你在吹','逮着了吧','姐还瞅不出来？'],lose:['算你运气','介回真让你蒙对了','邪门儿'],
+     mock:['哈哈哈哈现眼了吧','该！让你能','笑得我肚子疼','裤衩都输没喽'],gloat:['抓错喽吧，白背一堆','手欠了不是','乐死我了'],doubt:['吹牛不上税是吧','介牌邪性','我瞅着悬'],
      tilt:['你个老没溜儿的！','打镲呢吧你！','我跟你没完','姐今儿跟你耗上了','你介人损不损啊','气死我得了'],
      threat:['他要跑了！','甭让他出完'],last:['我可就剩两张了','瞅好了啊'],over:['收工，回家'],
      salty:{tilt:['你个王八羔子！','操，你还来劲了','去你大爷的！','傻逼玩意儿','妈了个巴子','姐跟你没完'],
@@ -931,18 +966,20 @@ const ROSTER=[
    talk:{
      play:['嗯','跟','走着'],bluff:['嗯'],pass:['过'],call:['数不对','不可能','你少算一张'],
      caught:['失误','算差了'],clear:['说了是真的'],win:['嗯','没算错'],lose:['记着了'],
+     mock:['数就对不上嘛','早算出来了','果然'],gloat:['这把不该抓的','账没算清吧','可惜了'],doubt:['这数有点挤','账面上悬','未必装得下'],
      tilt:['崴泥','嘛玩意儿','行，你狠'],threat:['他还剩两张','该拦了'],last:['俩'],over:['完了'],
      salty:{tilt:['操','妈的','真他妈邪门'],caught:['操，失误','妈的，算漏了'],
        call:['放屁，数不对','吹逼'],win:['傻逼'],lose:['操']}}}},
  {key:'tiezi',name:'铁子',ava:AVATARS.tiezi,
   persona:'你是铁子，东北人，四十来岁，大嗓门豪爽，最爱梭哈式的大吹特吹，抓人也痛快；上头了嗷嗷叫。一口东北话（哎呀妈呀、整、老铁、削你、瞅你咋地）。',
-  prof:{passReal:.10,passBluff:.32,bigPlay:.78,truthMax:.60,junkMix:.42,
-   callBase:.13,callPerCard:.05,crowd:.07,sniper:0,counts:0,guard:.75,exitD:.55,speed:[450,950],tiltable:2,chatty:.62,
+  prof:{passReal:.10,passBluff:.32,bigPlay:.78,truthMax:.75,junkMix:.32,
+   callBase:.13,callPerCard:.075,crowd:.07,sniper:0,counts:0,guard:.88,exitD:.80,speed:[450,950],tiltable:2,chatty:.62,
    talk:{
      play:['整！','瞅我的','来了老弟','干就完了'],bluff:['梭了！','整个大的','虚啥啊','就这么地'],
      pass:['歇一手','这轮不整','你们先造'],call:['瞅你咋地','我寻思你在吹','掀开看看'],
      caught:['哎呀妈呀','完犊子了','整劈叉了','让你逮着了'],clear:['咋地，是真的吧','瞅把你能耐的','服不服'],
      win:['我就寻思你在吹','咋样老弟','让你嘚瑟'],lose:['哎妈，走眼了','算你能耐','再来'],
+     mock:['哎呀妈呀笑死我了','完犊子了吧','让你嘚瑟','整劈叉了吧'],gloat:['抓瞎了吧','这波老亏了','眼神儿不中啊'],doubt:['吹呢吧','我咋不信呢','整这么大动静'],
      tilt:['急眼了啊我','别拦着我','整死你们','嗷嗷造！','谁也别想跑'],
      threat:['那谁要跑了','快拦着'],last:['就剩俩了啊','马上到站'],over:['完事儿，收摊！'],
      salty:{tilt:['我操，急眼了','削你信不信','妈了个巴子的','整他妈啥玩意儿'],
@@ -957,6 +994,7 @@ const ROSTER=[
      pass:['静观其变','不急于一时','让贤'],call:['数目对不上','恕我直言，存疑','阿是在骗人？'],
      caught:['失算了','惭愧惭愧','大意了'],clear:['清者自清','我从不妄言','勿要乱讲'],
      win:['果然如此','意料之中','数学不会骗人'],lose:['是我多虑了','失敬失敬'],
+     mock:['何必呢','意料之中','演技欠些火候'],gloat:['冲动了不是','判断力堪忧','这学费交得不冤'],doubt:['数目存疑','讲得有点满了','姑妄听之'],
      tilt:['荒谬','成何体统'],threat:['此人将胜，诸位','该拦一拦了'],last:['只剩两张了'],over:['承让'],
      salty:{tilt:['荒谬！简直荒谬！','岂有此理'],call:['一派胡言，翻开'],win:['班门弄斧'],lose:['罢了罢了']}}}},
  {key:'yaomei',name:'幺妹',ava:AVATARS.yaomei,
@@ -968,6 +1006,7 @@ const ROSTER=[
      pass:['这轮不来','歇哈儿','你们耍'],call:['你吹啥子嘛','铲铲，翻开','豁哪个喃'],
      caught:['遭了','被你逮到了嗦','算你凶'],clear:['锤子，是真的三','冤枉老子','说了没豁你'],
      win:['豁不到我','就晓得你在吹','幺妹眼睛尖得很'],lose:['豁，真的嗦','算你狡猾'],
+     mock:['哈哈哈遭了嘛','喊你吹','现世报哦','安逸了噻'],gloat:['背时哦','莫慌到伸手嘛','抓错了嘛哈哈'],doubt:['吹壳子哦','我不咋个信','悬得很'],
      tilt:['惹毛我了哈','龟儿的','老子跟你拼了','安逸了嗦'],
      threat:['他要跑了！','拦到拦到'],last:['就剩两张咯','巴适'],over:['耍完了，收工'],
      salty:{tilt:['龟儿子的！','锤子！','老子日你先人板板','惹毛老子了'],
@@ -982,6 +1021,7 @@ const ROSTER=[
      pass:['唔玩住','等阵先','你哋来'],call:['有冇搞错','条数唔啱喔','呃鬼食豆腐'],
      caught:['弊了','蚀本了','畀你捉到'],clear:['我几时呃过人','冤枉好人','睇清楚先啦'],
      win:['我一早睇穿你','condo唔住了啩','发达咯'],lose:['蚀了一铺','当交学费'],
+     mock:['哈哈衰咗啦','装唔落嘛','抵你','早知啦'],gloat:['蚀底咗啦','心急食唔到热豆腐','睇错市喽'],doubt:['讲得咁大','我唔多信','有啲玄'],
      tilt:['顶你个肺','搞搞震','好心你啦'],threat:['佢就快赢了','快啲拦住'],last:['仲有两张','就快收工'],over:['收工数钱'],
      salty:{tilt:['顶你个肺！','扑街仔','丢，激死我'],caught:['丢，畀你捉到','扑街，蚀大了'],
        call:['呃你老母，翻开','吹咩啊你'],win:['扑街仔，畀我捉到啦'],lose:['丢，睇错你']}}}}
@@ -1065,7 +1105,8 @@ function assignSeats(){
     NAMES[st]=h.name;
     HUMAN_AVAKEYS[st]=h.ava||'';
     AVA[st]= h.ava? AVATARS[h.ava] : (h.me? null : humanAva(h.name));
-    if(h.me) mySeat=st; else h.conn.seat=st;
+    if(h.me) mySeat=st;
+    else { h.conn.seat=st; if(NET&&NET.tks&&h.conn.tk&&NET.tks[h.conn.tk]) NET.tks[h.conn.tk].seat=st; }
   });
 }
 function pickCast(){
@@ -1103,7 +1144,26 @@ function humanAva(name){
     '<text x="24" y="31" text-anchor="middle" font-family="Songti SC,STSong,serif" font-size="18" fill="#F4EBD6">'+ch+'</text></svg>',
     post:'', f:null};
 }
-let tilt={}, bubble=null, rage=[0,0,0,0];
+let tilt={}, rage=[0,0,0,0], coolCall=[0,0,0,0];   // coolCall：抓错之后冷静几轮，别跟牌堆怄气
+// 每个座位一个气泡，各自计时：字越多挂得越久，别人说话不顶掉你的
+let BUBS={}, BUBQ={};
+function bubSet(p,b,ms){
+  const cur=BUBS[p], now=Date.now(), MIN=1600;
+  if(BUBQ[p]){ clearTimeout(BUBQ[p]); delete BUBQ[p]; }   // 已经有排队的：新话把它挤掉
+  if(cur&&cur.at&&now-cur.at<MIN){                        // 上一句还没看够：这句等等再上，别硬顶
+    BUBQ[p]=setTimeout(()=>{ delete BUBQ[p]; bubSet(p,b,ms); }, MIN-(now-cur.at));
+    return;
+  }
+  if(cur&&cur.timer) clearTimeout(cur.timer);
+  b.at=now;
+  BUBS[p]=b;
+  b.timer=setTimeout(()=>{ if(BUBS[p]===b){ delete BUBS[p]; render(); } },ms);
+  render();
+}
+function bubClear(){
+  for(const k in BUBS){ if(BUBS[k].timer) clearTimeout(BUBS[k].timer); } BUBS={};
+  for(const k in BUBQ){ clearTimeout(BUBQ[k]); } BUBQ={};
+}
 let known=[{},{},{},{}], roundLeaderId=null, humCaughtS=0, humHonestS=0;
 let mood=['','idle','idle','idle'];
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -1128,10 +1188,10 @@ function aiBanter(p,evText){
       max_tokens:60, temperature:1.2,
       messages:[
         {role:'system',content:PERSONA[p]+' 说话保持你自己的方言味儿。'+
-          (SET.salty&&(rage[p]||0)>=2
+          (SET.salty&&(rage[p]||0)>=3
             ? '你已经连背 '+rage[p]+' 堆牌，正急眼：骂街要够味儿——操、他妈的、妈了个巴子、王八羔子、孙子、傻逼玩意儿，随便用，就是牌桌上急眼的劲儿。骂牌骂局骂手气都行，别碰人家里人、别用歧视性字眼。'
-            : SET.salty&&(rage[p]||0)===1
-            ? '你刚背了一堆牌，有点来气，可以轻口（妈的、邪门 这个级别），别下重的。'
+            : SET.salty&&(rage[p]||0)===2
+            ? '你连背两堆牌了，有点来气，可以轻口（妈的、邪门 这个级别），别下重的。'
             : '心平气和，别带脏字。')+
           ' 你正在打扑克牌游戏「说瞎话」。根据刚发生的事说一句话，最多 14 个字，要像牌桌上脱口而出的，'+
           '可以翻旧账（下面给了你们的旧账）。只输出 JSON：{"talk":"..."}'},
@@ -1151,6 +1211,7 @@ function aiBanter(p,evText){
 }
 
 async function takeTurn(p){
+  if(coolCall[p]) coolCall[p]--;     // 冷静计数按自己的轮次消
   if(!tilt[p]) mood[p]='idle';       // 轮到自己，表情归位（上头的还绷着脸）
   const plan=aiPlan(p);
   await sleep(ponderMs(p,plan));          // 想多久，看牌情
@@ -1176,7 +1237,8 @@ function ponderMs(p,plan){
   if(hands[p].length<=3)t*=1.35;
   if(pile.length>12)    t*=1.15;
   if(tilt[p])           t*=.60;           // 上头了，出手急
-  return Math.min(3400,Math.round(t));
+  t*=PACEF();
+  return Math.min(Math.round(3400*PACEF()),Math.round(t));
 }
 
 function aiPlan(p){
@@ -1274,16 +1336,16 @@ function chat(p,kind,rate){
   const S=P.talk.salty;
   if(SET.salty&&S&&S[kind]&&S[kind].length){
     // 火气越大嘴越脏：没背过牌堆基本干净，背两三堆之后满嘴跑火车；手牌攒多了也焦躁
-    const heat=Math.min(.85,(rage[p]||0)*.3+Math.max(0,hands[p].length-13)*.04);
+    const heat=Math.min(.85,Math.max(0,(rage[p]||0)-1)*.35+Math.max(0,hands[p].length-14)*.04);   // 背第一堆忍着，第二堆起才上脏口
     pool = Math.random()<heat ? S[kind] : pool;
   }
   const line=pick(pool); if(!line) return;
   speak2(p,line);
 }
 function speak2(p,line){
-  bubble={p:p,text:String(line).slice(0,32),pop:true};  // 只弹气泡，不占日志；32 字封顶
-  render();
-  if(NET&&NET.host&&NET.started) netAll({t:'talk',seat:p,text:bubble.text});
+  const text=String(line).slice(0,60);   // 只弹气泡，不占日志；60 字封顶，长了竖着排
+  bubSet(p,{text:text,pop:true}, Math.min(9000, 3000+text.length*130));  // 字多多挂会儿，看得完
+  if(NET&&NET.host&&NET.started) netAll({t:'talk',seat:p,text:text});
 }
 
 function aiChallenge(p,P,hot){
@@ -1306,7 +1368,8 @@ function aiChallenge(p,P,hot){
     else prob=Math.min(.99,prob*1.3);           // 被点数逼出来的收官，可疑得很
     if(P.counts&&(known[q][R]||0)>=k) prob*=.4; // 小赵记得他手里真有这个数
     prob+=.06*mine;
-    if(hot) prob=Math.min(.99,prob+.1);
+    if(hot) prob=Math.min(.99,prob+.05);
+    if(coolCall[p]) prob*=.6;                   // 刚抓错：收官照抓，但收着点
     return Math.random()<prob;
   }
 
@@ -1331,7 +1394,8 @@ function aiChallenge(p,P,hot){
     prob*= Math.min(1.35, .5+1.4*((c+.7)/(c+h+2)));
   }
   if(P.counts&&(known[q][R]||0)>=k) prob*=.5;   // 明知他有真牌，少冤枉
-  if(hot) prob+=.16;
+  if(hot) prob+=.08;                            // 上头的疯劲儿留给出牌，抓牌只加一半
+  if(coolCall[p]) prob*=.3;                     // 刚抓错背了堆：冷静两轮
   prob*=Math.max(.55,1.15-.028*pile.length);    // 堆越大，抓错越亏（但也别怂到不敢抓）
   if(hands[p].length<=4) prob*=.7;              // 自己快赢了，背不起一堆牌
   else if(pile.length<=3) prob*=1.1;
@@ -1345,6 +1409,11 @@ function presentPlayed(ev){
   if(tilt[p]) tilt[p]--;                       // 出完这手，火气消一格
   for(const r in known[p]) known[p][r]=Math.max(0,known[p][r]-ev.n);  // 他出了牌，明牌可能被打掉
   say(nm(p)+' 报 '+ev.n+' 个 '+RANKS[ev.rank]+(ev.out?' —— 手牌出完了！':''));
+  if(ev.n>=3&&!ev.out&&Math.random()<.15){
+    const dl=[0,1,2,3].filter(i=>isAI(i)&&i!==p);
+    if(dl.length){ const g=dl[Math.random()*dl.length|0], myE=banterEpoch;
+      setTimeout(()=>{ if(myE===banterEpoch&&!over&&lastPlay&&lastPlay.player===p) chat(g,'doubt',.85); },800+Math.random()*700); }
+  }
   Sfx.play(ev.n);
   stage(claimHTML(p,ev.n,ev.rank)+pileHTML(ev.n));
   render();
@@ -1353,13 +1422,12 @@ function presentPlayed(ev){
 async function presentReveal(ev){
   const p=ev.target, q=ev.by, cards=ev.cards, truth=ev.truth;
   if(tilt[q]) tilt[q]--;
-  bubble=null;
   say(nm(q)+' 喊了说瞎话');
   Sfx.call();
   stage('<div class="who">'+nm(q)+' 喊：说瞎话！</div>'+
         '<div class="reveal">'+cards.map(faceUp).join('')+'</div>');
   Sfx.flip();
-  render(); await sleep(1000);
+  render(); await sleep(1000*PACEF());
   if(truth) Sfx.truth(); else Sfx.lie();
   if(p===mySeat){ if(truth){MEM.humanHonest=(MEM.humanHonest||0)+1;humHonestS++;} else {MEM.humanCaught++;humCaughtS++;} }
   if(q===mySeat){ if(truth) MEM.humanBadCall++; else MEM.humanGoodCall++; }
@@ -1370,7 +1438,7 @@ async function presentReveal(ev){
       (truth?'你说的是真话，他冤枉你，这堆牌归他背':'你真在吹，让他逮个正着，你把整桌牌收走')); }
   stage('<div class="who">'+nm(q)+' 喊：说瞎话！</div>'+
         '<div class="reveal">'+cards.map(faceUp).join('')+'</div>', truth?'真话':'瞎话');
-  await sleep(1300);
+  await sleep(1300*PACEF());
 
   const loser=ev.loser, next=ev.next, pn=ev.picked;
   if(AVA[loser]&&AVA[loser].f) mood[loser]='oops';
@@ -1379,18 +1447,28 @@ async function presentReveal(ev){
   cards.forEach(c=>{ const key=isJoker(c)?'j':rk(c); known[loser][key]=(known[loser][key]||0)+1; }); // 桌面见过的牌，全桌都记得到了谁手里
   Sfx.pickup(pn);
   rage[loser]=(rage[loser]||0)+1;                       // 背一次牌堆，火气 +1
+  if(truth&&isAI(q)) coolCall[q]=2;                     // 抓错了：接下来两轮冷静，别连环送
   if(isAI(loser)&&PROFILE[loser]&&PROFILE[loser].tiltable) tilt[loser]=PROFILE[loser].tiltable;  // 谁收了牌谁上头
   say(truth ? nm(p)+' 说的是真话 — '+nm(loser)+' 收走 '+pn+' 张'
             : nm(p)+' 真在骗人 — 收走 '+pn+' 张');
   stage('<div class="who">'+nm(loser)+' 收走了 '+pn+' 张</div>'+
         '<div class="plaque">'+nm(next)+' 接着出</div>');
+  const gawk=[0,1,2,3].filter(i=>isAI(i)&&i!==p&&i!==q);   // 看戏的也有话说
+  if(gawk.length&&Math.random()<.55){
+    const g=gawk[Math.random()*gawk.length|0], myE=banterEpoch, kind=truth?'gloat':'mock';
+    setTimeout(()=>{ if(myE===banterEpoch&&!over){
+      chat(g,kind,.9);
+      aiBanter(g,'你没掺和这场翻牌，纯看戏：'+(truth
+        ? nm(q)+' 喊说瞎话抓 '+nm(p)+'，结果人家是真的，'+nm(q)+' 白背了 '+pn+' 张牌'
+        : nm(p)+' 说瞎话被 '+nm(q)+' 当场翻开，收走了整桌牌')+' —— 损一句或者幸灾乐祸一句');
+    }},1000+Math.random()*800);
+  }
   if(isAI(q)){ chat(q, truth?'lose':'win', .70);       // 抓的人再回一句
     aiBanter(q, '你抓 '+(isAI(p)?NAMES[p]:'真人玩家'+(p===mySeat?'':NAMES[p]))+'，翻开 —— '+
       (truth?'抓错了，人家是真的，'+pn+' 张牌全归你背':'抓对了，他在吹，他收走 '+pn+' 张')); }
-  render(); await sleep(1000);
+  render(); await sleep(1000*PACEF());
 }
 async function presentBurn(ev){
-  bubble=null;
   Sfx.burn();
   if(!ev.eaten){
     say('三家都过 — 桌上 '+ev.n+' 张作废，'+nm(ev.leader)+' 开新一轮');
@@ -1401,7 +1479,7 @@ async function presentBurn(ev){
     say('三家都过 — '+nm(ev.leader)+' 收走 '+ev.n+' 张，开新一轮');
     stage('<div class="who">三家都过</div><div class="plaque">'+nm(ev.leader)+' 收走 '+ev.n+' 张</div>');
   }
-  render(); await sleep(1200);
+  render(); await sleep(1200*PACEF());
 }
 
 /* ═══ 联机：主机权威制。引擎只在房主手机上跑，客机收事件、发动作。
@@ -1420,11 +1498,20 @@ function loadPeerLib(){
     })();
   });
 }
-const peerOpts=()=>window.__peerOpts||{};        // 测试时指到本地信令服务器
+// 宾馆/公司 WiFi 常有客户端隔离 + 封 UDP，直连打洞打不通。除了 PeerJS 自带的
+// STUN/TURN，再加 Open Relay 的免费中转（走 80/443，防火墙封不住）。连不上直连就自动走中转。
+const ICE=[
+  {urls:'stun:stun.l.google.com:19302'},
+  {urls:'turn:us-0.turn.peerjs.com:3478',username:'peerjs',credential:'peerjsp'},
+  {urls:'turn:eu-0.turn.peerjs.com:3478',username:'peerjs',credential:'peerjsp'},
+  {urls:'turn:staticauth.openrelay.metered.ca:80',username:'openrelayproject',credential:'openrelayprojectsecret'},
+  {urls:'turn:staticauth.openrelay.metered.ca:80?transport=tcp',username:'openrelayproject',credential:'openrelayprojectsecret'},
+  {urls:'turn:staticauth.openrelay.metered.ca:443',username:'openrelayproject',credential:'openrelayprojectsecret'},
+  {urls:'turns:staticauth.openrelay.metered.ca:443?transport=tcp',username:'openrelayproject',credential:'openrelayprojectsecret'}
+];
+const peerOpts=()=>window.__peerOpts||{config:{iceServers:ICE}};   // 测试时 __peerOpts 指到本地信令服务器
 const ROOMPFX='shuoxiahua-v1-';
-// 全家固定的牌桌，但留四个槽位：僵尸注册（切后台没正常关的旧页面）占了一个就用下一个
-const SLOTS=['MIAOJIA1','MIAOJIA2','MIAOJIA3','MIAOJIA4'];
-addEventListener('pagehide',()=>{ if(NET&&NET.peer){ try{NET.peer.destroy();}catch(_){}} });
+const FIXROOM='MIAOBO';   // 全家共用一个房间，不用念房号。连法还是单发直连，跟有房号时一模一样
 const PROXY_PROF=(()=>null)();   // 掉线代打用的牌风，开局后填
 
 // 表情贴纸：用你自己头像的脸。没挑人物脸的用文字兜底
@@ -1435,10 +1522,40 @@ function emoFace(key,emo){       // 某人物做某表情的整张脸
   const A=AVATARS[key]; if(!A) return '';
   return A.pre+(A.f[emo]||A.f.idle)+A.post;
 }
+function dsChatOn(){ return (NET&&!NET.host) ? !!NET.dsOn : !!(SET.ai&&KEY); }
 function paintEbar(){
+  if(dsChatOn()){                              // 接上 DeepSeek：真对话框，AI 会接茬
+    $('ebar').innerHTML='<input id="chatIn" maxlength="30" placeholder="冲牌桌喊一句，他们会接茬…">'+
+      '<button class="go" id="chatGo">喊</button>';
+    $('chatGo').onclick=sendChat;
+    $('chatIn').onkeydown=e=>{ if(e.key==='Enter') sendChat(); };
+    setTimeout(()=>{ const i=$('chatIn'); if(i&&$('ebar').classList.contains('on')) i.focus(); },80);
+    return;
+  }
   $('ebar').innerHTML = myAvaKey
     ? EMOKEYS.map(k=>'<button class="emo" data-k="'+k+'">'+emoFace(myAvaKey,k)+'</button>').join('')
     : EMOKEYS.map(k=>'<button data-k="'+k+'">'+EMOTXT[k]+'</button>').join('');
+}
+function sendChat(){
+  const el=$('chatIn'); if(!el) return;
+  const t=el.value.trim().slice(0,30); if(!t) return;
+  const now=Date.now(); if(now-lastEmoteAt<2500) return;
+  lastEmoteAt=now; el.value='';
+  $('ebar').classList.remove('on');
+  selfToast(t);
+  if(NET&&!NET.host&&NET.conn){ try{NET.conn.send({t:'chat',txt:t});}catch(e){} return; }
+  humanChat(mySeat,t);
+}
+function humanChat(seat,t){                    // 主机侧：上泡、广播、AI 接茬，偶尔第二个人补刀
+  speak2(seat,t);
+  const others=[0,1,2,3].filter(isAI);
+  if(!others.length) return;
+  const g=others[Math.random()*others.length|0], myE=banterEpoch;
+  setTimeout(()=>{ if(myE===banterEpoch&&!over) aiBanter(g,'真人玩家 '+NAMES[seat]+' 冲全桌喊了句：「'+t+'」——你接他的话茬回一句'); },600+Math.random()*700);
+  if(others.length>1&&Math.random()<.35){
+    const rest=others.filter(x=>x!==g), g2=rest[Math.random()*rest.length|0];
+    setTimeout(()=>{ if(myE===banterEpoch&&!over) aiBanter(g2,'刚才 '+NAMES[seat]+' 冲牌桌喊：「'+t+'」，'+NAMES[g]+' 已经回过他了。你在旁边看戏，顺嘴再补一句'); },3000+Math.random()*1500);
+  }
 }
 function selfToast(t,avaKey,emo){
   const el=$('etoast');
@@ -1448,10 +1565,7 @@ function selfToast(t,avaKey,emo){
   clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('on'),1600);
 }
 function showEmo(seat,key,emo){           // 全桌展示某人的表情贴纸
-  bubble={p:seat,emoKey:key,emo:emo,pop:true};
-  render();
-  const mine=bubble;
-  setTimeout(()=>{ if(bubble===mine){ bubble=null; render(); } },2600);
+  bubSet(seat,{emoKey:key,emo:emo,pop:true},2600);
 }
 function sendEmote(k){
   const now=Date.now();
@@ -1480,27 +1594,21 @@ function netFail(msg){
 }
 
 /* ── 房主 ── */
-async function hostRoom(slotIdx,cycle){
-  slotIdx=slotIdx||0; cycle=cycle||0;
+async function hostRoom(wait){
   await loadPeerLib();
-  if(slotIdx>=SLOTS.length){
-    if(cycle<3){
-      netStatus('牌桌都被占着（残留的旧连接），稍等自动重试…');
-      NET={host:true,_t:setTimeout(()=>hostRoom(0,cycle+1),2500)};
-      return;
-    }
-    netFail('牌桌被占满了 —— 家里其他手机还开着房？关掉它们再试');
-    return;
-  }
-  const slot=SLOTS[slotIdx];
-  const peer=new Peer(ROOMPFX+slot,peerOpts());
-  NET={host:true,peer:peer,code:slot,conns:[],started:false,waitRemote:null,waitSeat:-1};
-  netStatus(slotIdx||cycle?'换个位置重开…':'正在开牌桌…');
+  const peer=new Peer(ROOMPFX+FIXROOM,peerOpts());
+  NET={host:true,peer:peer,conns:[],started:false,waitRemote:null,waitSeat:-1,wait:wait||0};
+  netStatus(wait?'房间还被上一局占着，排队等它腾出来…（已等 '+wait*4+' 秒）':'正在开房…');
   peer.on('open',()=>{ netStatus(''); paintLobby(); });
   peer.on('error',e=>{
+    if(!NET||NET.peer!==peer) return;
     if(e.type==='unavailable-id'){
+      // 旧页面攥着房间没放：信令服务器最长约一分钟自动收回。排队重试，不用人管
       try{peer.destroy();}catch(_){}
-      if(NET&&NET.host) hostRoom(slotIdx+1,cycle);   // 这个槽被占（多半是僵尸），试下一个
+      const w=NET.wait+1, myNET=NET;
+      if(w>22){ netFail('房间一直被占着——把开过房的旧页面全关掉，再回来点开房'); return; }
+      myNET._t=setTimeout(()=>{ if(NET===myNET&&NET.host) hostRoom(w); },4000);
+      netStatus('房间还被上一局占着，排队等它腾出来…（已等 '+w*4+' 秒）');
     }
     else netFail(e.type==='network'?'连不上联机服务器':'联机出错：'+e.type);
   });
@@ -1509,6 +1617,14 @@ async function hostRoom(slotIdx,cycle){
     conn.on('close',()=>hostDrop(conn));
   });
 }
+// 占房的主要来源就是自己：开着房的页面被刷新/关掉/切后台，房间名还挂在服务器上。
+// 没开局的房，页面一退就主动交还；切后台回来自动重新开一间，无感
+addEventListener('pagehide',()=>{
+  if(NET&&NET.host&&!NET.started){ try{NET.peer.destroy();}catch(_){} NET._freed=true; }
+});
+addEventListener('pageshow',()=>{
+  if(NET&&NET.host&&!NET.started&&NET._freed){ NET=null; hostRoom(); }
+});
 function hostMsg(conn,m){
   if(!NET||!NET.host) return;
   if(m.t==='join'){
@@ -1517,6 +1633,8 @@ function hostMsg(conn,m){
     conn.seat=NET.conns.length+1;
     conn.pname=String(m.name||'玩家').replace(/[<>&"]/g,'').slice(0,8)||'玩家';
     conn.avaKey=AVATARS[m.ava]?m.ava:'';
+    conn.tk=Math.random().toString(36).slice(2,10);        // 座位令牌：断线重连凭它认人
+    NET.tks=NET.tks||{}; NET.tks[conn.tk]={seat:conn.seat,name:conn.pname,ava:conn.avaKey};
     NET.conns.push(conn);
     lobbyBroadcast(); paintLobby();
   }else if(m.t==='emo'&&NET.started){
@@ -1527,6 +1645,26 @@ function hostMsg(conn,m){
       showEmo(conn.seat,key,m.emo);
       netAll({t:'emo',seat:conn.seat,key:key,emo:m.emo});
     }
+  }else if(m.t==='rejoin'&&NET.started){
+    const rec=NET.tks&&NET.tks[m.tk];
+    if(!rec){ try{conn.send({t:'full'});}catch(e){} return; }
+    if(m.v!==VERSION){ try{conn.send({t:'badver',v:VERSION});}catch(e){} return; }
+    const seat=rec.seat;
+    NET.conns.filter(c=>c.seat===seat&&c!==conn).forEach(c=>{try{c.close();}catch(e){}});   // 同座旧线关干净，别重复收事件
+    NET.conns=NET.conns.filter(c=>c.seat!==seat);
+    conn.seat=seat; conn.pname=rec.name; conn.avaKey=rec.ava; conn.tk=m.tk;
+    NET.conns.push(conn);
+    SEATK[seat]='remote'; delete PROFILE[seat]; delete PERSONA[seat];   // AI 代打交回真人
+    say('✓ '+NAMES[seat]+' 重连回来了'); render();
+    const env=envelope();                                   // 先发全量现状让他重建牌桌，再广播
+    const avaKeys=[0,1,2,3].map(i=>SEATK[i]==='ai'?CASTKEY[i]:(HUMAN_AVAKEYS[i]||''));
+    try{conn.send({t:'start',v:VERSION,seat:seat,names:NAMES.slice(),seatk:SEATK.slice(),
+      castKeys:CASTKEY,avaKeys:avaKeys,ecfg:ECFG,hand:hands[seat],env:env,
+      back:BACKS.indexOf(BACK),ds:!!(SET.ai&&KEY)});}catch(e){}
+    netAll({t:'talk',seat:seat,text:'我回来了'});
+  }else if(m.t==='chat'&&NET.started){
+    const now=Date.now(), t=String(m.txt||'').slice(0,30);
+    if(t&&(!conn._lastEmote||now-conn._lastEmote>2500)){ conn._lastEmote=now; humanChat(conn.seat,t); }
   }else if(m.t==='emote'&&NET.started){
     const now=Date.now();
     const t=String(m.txt||'').slice(0,12);
@@ -1549,6 +1687,7 @@ function hostDrop(conn){
     return;
   }
   const st=conn.seat;
+  if(conn.tk&&NET.tks&&NET.tks[conn.tk]) NET.tks[conn.tk].seat=st;
   if(SEATK[st]==='remote'){
     SEATK[st]='ai';
     PROFILE[st]=JSON.parse(JSON.stringify(ROSTER[0].prof)); PROFILE[st].chatty=0;
@@ -1561,7 +1700,7 @@ function hostDrop(conn){
 }
 function lobbyBroadcast(){
   const names=[NET.myName].concat(NET.conns.map(c=>c.pname));
-  NET.conns.forEach(c=>c.send({t:'lobby',names:names,yourSeat:c.seat}));
+  NET.conns.forEach(c=>c.send({t:'lobby',names:names,yourSeat:c.seat,tk:c.tk}));
 }
 function envelope(){
   return {turn:turn,over:over,cnt:hands.map(h=>h.length),pileN:pile.length,
@@ -1586,7 +1725,7 @@ function netSendStart(){
   NET.conns.forEach(c=>{
     const avaKeys=[0,1,2,3].map(i=>SEATK[i]==='ai'?CASTKEY[i]:(HUMAN_AVAKEYS[i]||''));
     try{c.send({t:'start',v:VERSION,seat:c.seat,names:NAMES.slice(),seatk:SEATK.slice(),
-      castKeys:CASTKEY,avaKeys:avaKeys,ecfg:ECFG,hand:hands[c.seat],env:env});}catch(e){}
+      castKeys:CASTKEY,avaKeys:avaKeys,ecfg:ECFG,hand:hands[c.seat],env:env,back:BACKS.indexOf(BACK),ds:!!(SET.ai&&KEY)});}catch(e){}  // 牌背全桌统一；ds=房主接了 DeepSeek
   });
 }
 function startNetGame(){
@@ -1613,51 +1752,46 @@ function waitRemote(seat){
 }
 
 /* ── 客机 ── */
-async function joinRoom(_code,name,round){
-  round=round||0;
+async function joinRoom(name){
+  if(NET&&!NET.host&&NET.joined){ netStatus('已经在房里了，等房主开局…'); return; }   // 手快连点，不重复进
+  if(NET){ try{NET.peer.destroy();}catch(_){} NET=null; }   // 重进前先掐掉旧连接，房主那边旧座自动清
   await loadPeerLib();
   const peer=new Peer(peerOpts());
-  NET={host:false,peer:peer,q:Promise.resolve(),pendCards:null,started:false,adopted:false};
-  netStatus(round?'牌桌还没开，等房主…（第 '+(round+1)+' 轮找）':'正在找家里的牌桌…');
+  NET={host:false,peer:peer,q:Promise.resolve(),pendCards:null,started:false,joined:false};
+  netStatus('正在连接…');
   const onMsg=m=>{ NET.q=NET.q.then(()=>clientMsg(m)).catch(e=>{console.error(e); say('⚠ 出错：'+e.message); render(); clientAfter();}); };
   peer.on('error',e=>{
-    if(e.type==='peer-unavailable') return;         // 某个槽没人，正常，探测继续
-    netFail(e.type==='network'?'连不上联机服务器':'联机出错：'+e.type);
+    if(!NET||NET.peer!==peer) return;   // 旧连接的余响，不理
+    if(e.type==='peer-unavailable') netFail('房主还没开房——让房主先点「联机 · 开房」，再点一次加入');
+    else netFail(e.type==='network'?'连不上联机服务器':'联机出错：'+e.type);
   });
   peer.on('open',()=>{
-    const probes=[];
-    SLOTS.forEach(slot=>{
-      let conn;
-      try{ conn=peer.connect(ROOMPFX+slot,{reliable:true}); }catch(_){ return; }
-      const pr={conn:conn,t:setTimeout(()=>{ try{conn.close();}catch(_){}} ,3500)};
-      probes.push(pr);
-      conn.on('open',()=>{ try{conn.send({t:'join',name:name,v:VERSION,ava:myAvaKey});}catch(_){}});
-      conn.on('data',m=>{
-        if(!NET||NET.host) return;
-        if(!NET.adopted){                            // 第一个真正应答的房间就是活的
-          NET.adopted=true; clearTimeout(pr.t);
-          NET.conn=conn;
-          probes.forEach(o=>{ if(o.conn!==conn){ clearTimeout(o.t); try{o.conn.close();}catch(_){}} });
-          conn.on('close',()=>{ if(NET&&!over&&NET.started) netFail('和房主断线了'); });
-          netStatus('已进门，等房主开局…');
-          onMsg(m);
-        }else if(conn===NET.conn) onMsg(m);
-      });
+    if(!NET||NET.peer!==peer) return;
+    const conn=peer.connect(ROOMPFX+FIXROOM,{reliable:true});
+    NET.conn=conn;
+    const hint=setTimeout(()=>{ if(NET&&NET.peer===peer&&!NET.joined) netStatus('半天没动静——房主那边可能是残留的旧页面，让房主重开一次房'); },12000);
+    conn.on('open',()=>{
+      clearTimeout(hint);
+      netStatus('已连上，等房主开局…');
+      try{conn.send({t:'join',name:name,v:VERSION,ava:myAvaKey});}catch(_){}
     });
-    setTimeout(()=>{                                 // 这一轮四个槽都没人应，整体再来
-      if(NET&&!NET.host&&!NET.adopted){
-        try{peer.destroy();}catch(_){}
-        if(round<10){ NET._t=setTimeout(()=>{ if(NET&&!NET.host) joinRoom(null,name,round+1); },2200); }
-        else netFail('等了很久也没等到牌桌开门 —— 确认房主点了「联机 · 开房」，然后重试');
-      }
-    },4200);
+    conn.on('data',onMsg);
+    conn.on('close',()=>{ if(NET&&NET.peer===peer&&!over&&NET.started){ try{peer.destroy();}catch(e){} clientRejoin(0); } });
   });
 }
 async function clientMsg(m){
   if(!NET) return;
-  if(m.t==='lobby'){ netStatus('已入座（'+m.names.join('、')+'）等房主开局…'); }
+  if(m.t!=='start'&&m.t!=='lobby'&&m.t!=='badver'&&m.t!=='full'&&(typeof mySeat!=='number'||!hands||!hands.length||!logs)) return;   // 白纸页面先等 start
+  if(m.t==='lobby'){ NET.joined=true;
+    if(m.tk){ RJTK=m.tk; try{localStorage.setItem('sxh_tk',m.tk);}catch(e){} }
+    netStatus('已入座（'+m.names.join('、')+'）等房主开局…'); }
   else if(m.t==='badver'){ netFail('版本不一致：房主 v'+m.v+'，你 v'+VERSION+'，都刷新到最新再来'); }
-  else if(m.t==='full'){ netFail('房间满了或已经开打'); }
+  else if(m.t==='full'){
+    const tk=RJTK||(function(){try{return localStorage.getItem('sxh_tk');}catch(e){return null;}})();
+    if(tk&&!NET.triedTk&&NET.conn){ NET.triedTk=1; try{NET.conn.send({t:'rejoin',tk:tk,v:VERSION});}catch(e){}
+      netStatus('牌局开着——正在按老座位接回去…'); return; }
+    netFail('房间满了或已经开打');
+  }
   else if(m.t==='talk'){ speak2(m.seat,m.text); }
   else if(m.t==='emo'){ showEmo(m.seat,m.key,m.emo); }
   else if(m.t==='talkless'){ say('⚠ '+m.name+' 掉线了，AI 代打'); render(); }
@@ -1665,9 +1799,34 @@ async function clientMsg(m){
   else if(m.t==='start'){ await clientStart(m); }
   else if(m.t==='ev'&&NET.started){ clientApply(m.env,m.evs); await presentEvents(m.evs); clientAfter(); }
 }
+let RJTK=null;                                 // 本座的重连令牌
+function clientRejoin(round){
+  if(over) return;
+  const tk=RJTK||(function(){try{return localStorage.getItem('sxh_tk');}catch(e){return null;}})();
+  if(!tk) return netFail('和房主断线了');
+  if(round>=15) return netFail('重连了半天没接上——房主那边可能也断了');
+  say('⚠ 掉线了，正在重连…（第 '+(round+1)+' 次）'); render();
+  const peer=new Peer(peerOpts());
+  NET={host:false,peer:peer,q:Promise.resolve(),pendCards:null,started:true,joined:true,rejoining:true};
+  const onMsg=m=>{ NET.q=NET.q.then(()=>clientMsg(m)).catch(e=>{console.error(e); say('⚠ 出错：'+e.message); render(); clientAfter();}); };
+  let done=false;
+  const again=()=>{ if(done||!NET||NET.peer!==peer) return; done=true;
+    try{peer.destroy();}catch(e){} setTimeout(()=>{ if(!over) clientRejoin(round+1); },3000); };
+  peer.on('error',again);
+  peer.on('open',()=>{
+    if(!NET||NET.peer!==peer) return;
+    const conn=peer.connect(ROOMPFX+FIXROOM,{reliable:true});
+    NET.conn=conn;
+    conn.on('open',()=>{ try{conn.send({t:'rejoin',tk:tk,v:VERSION});}catch(e){} });
+    conn.on('data',onMsg);
+    conn.on('close',()=>{ if(!over&&NET&&NET.started) again(); });
+  });
+}
 async function clientStart(m){
   NET.started=true;
   mySeat=m.seat; SEATK=m.seatk; NAMES=m.names; ECFG=m.ecfg; CASTKEY=m.castKeys;
+  BACK=BACKS[m.back]||'';   // 跟房主用同一款牌背
+  NET.dsOn=!!m.ds; $('ebar').innerHTML='';   // 喊话面板按房主的 DeepSeek 状态重画
   AVA=[null,null,null,null];
   for(let i=0;i<4;i++){
     const ak=(m.avaKeys&&m.avaKeys[i])||'';
@@ -1682,7 +1841,7 @@ async function clientStart(m){
   pile=Array(m.env.pileN).fill(-1);
   clientEnv(m.env);
   winner=null;logs=[];selected=new Set();fresh=new Set();outQueue=[];
-  tilt={};bubble=null;rage=[0,0,0,0];mood=['idle','idle','idle','idle'];known=[{},{},{},{}];banterEpoch++;rollPileJit();rollBack();
+  tilt={};bubClear();rage=[0,0,0,0];coolCall=[0,0,0,0];mood=['idle','idle','idle','idle'];known=[{},{},{},{}];banterEpoch++;rollPileJit();
   $('netSheet').classList.remove('on');
   $('overSheet').classList.remove('on');
   $('emoteBtn').style.display='inline';
@@ -1750,13 +1909,13 @@ function finish(p){
 /* ═══ 主循环：拿动作 → 进引擎 → 演事件。联机时动作换成从网上来，其余不变 ═══ */
 async function presentEvents(evs){
   for(const ev of evs){
-    if(ev.e==='played'){ presentPlayed(ev); if(!over) await sleep(560); }
+    if(ev.e==='played'){ presentPlayed(ev); if(!over) await sleep(560*PACEF()); }
     else if(ev.e==='passed'){
       if(tilt[ev.seat]) tilt[ev.seat]--;
       Sfx.pass();
       say(nm(ev.seat)+' 过');
       stage(claimHTML(ev.claimSeat,ev.claimN,ev.rank)+pileHTML());
-      render(); await sleep(720);
+      render(); await sleep(720*PACEF());
     }
     else if(ev.e==='burn'){ await presentBurn(ev); }
     else if(ev.e==='reveal'){ await presentReveal(ev); }
@@ -1826,11 +1985,12 @@ document.querySelectorAll('.seg').forEach(seg=>{
 });
 $('rulesBtn').onclick=()=>{paintRules();$('rulesSheet').classList.add('on');};
 $('emoteBtn').onclick=()=>{
-  if(!$('ebar').innerHTML) paintEbar();
+  const opening=!$('ebar').classList.contains('on');
+  if(opening) paintEbar();
   $('ebar').classList.toggle('on');
 };
 $('ebar').addEventListener('click',e=>{
-  const b=e.target.closest('button'); if(!b) return;
+  const b=e.target.closest('button'); if(!b||!b.dataset.k) return;
   $('ebar').classList.remove('on');
   sendEmote(b.dataset.k);
 });
@@ -1962,13 +2122,13 @@ $('hostGo').onclick=()=>{
   keepName(NET.myName);
   startNetGame();
 };
-$('hostCancel').onclick=()=>{ if(NET){ if(NET._t)clearTimeout(NET._t); try{NET.peer.destroy();}catch(e){} } NET=null; $('netSheet').classList.remove('on'); };
+$('hostCancel').onclick=()=>{ if(NET){ try{NET.peer.destroy();}catch(e){} } NET=null; $('netSheet').classList.remove('on'); };
 $('joinGo').onclick=async ()=>{
   const nm=($('joinName').value.trim()||'玩家').slice(0,8);
   keepName(nm);
-  try{ await joinRoom(null,nm); }catch(e){ $('netStatus').textContent=e.message; }
+  try{ await joinRoom(nm); }catch(e){ $('netStatus').textContent=e.message; }
 };
-$('joinCancel').onclick=()=>{ if(NET){ if(NET._t)clearTimeout(NET._t); try{NET.peer.destroy();}catch(e){} } NET=null; $('netSheet').classList.remove('on'); };
+$('joinCancel').onclick=()=>{ if(NET){ try{NET.peer.destroy();}catch(e){} } NET=null; $('netSheet').classList.remove('on'); };
 $('startBtn').onclick=()=>{
   Sfx.wake();                                           // 这一下点击顺便把 iOS 的声音解锁了
   $('startSheet').classList.add('gone');
